@@ -1,15 +1,12 @@
 ---
 html_document:
   code_folding: hide
+author: "Zongbo Cai"
 output:
   html_document:
     df_print: paged
 title: "Statistical Analysis for Marriage in HappyDB"
 ---
-
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
 ```{r echo=FALSE, results='hide',message=FALSE}
 ##Import libraries and read needed data.
@@ -18,6 +15,7 @@ library(sentimentr)
 library(gridExtra)
 library(ggplot2)
 library(tm)
+library(wordcloud)
 library(wordcloud2)
 library(RColorBrewer)
 library(dplyr)
@@ -25,7 +23,6 @@ library(tidytext)
 library(scales)
 library(ngram)
 library(syuzhet)
-library(qdap)
 library(widyr)
 library(igraph)
 library(ggraph)
@@ -44,12 +41,17 @@ bag_of_words <- combined_data %>% unnest_tokens(word, text)
 word_count <- bag_of_words %>% count(word, sort = TRUE)
 ```
 
+![](/Users/zongbocai/Documents/GitHub/Spring2019-Proj1-NapaCabbage/figs/marriage_swear.jpg)
+
 ##Introduction.
 HappyDB is a corpus of 100,000 crowd-sourced happy moments. There are many interesting phenomena that can be revealed by the data in this database. Many people say that marriage is the grave of love. Does marriage have impact on people's feelings, especially on happy things? What do people do before and after marriage? Let's take a look.
 
 ##Overall of whole dataset.
 ```{r echo=FALSE, results='hide',message=FALSE}
-wordcloud2(word_count[1:150,], color = "random-light", backgroundColor = "white")
+##wordcloud2(word_count[1:150,], color = "random-light", backgroundColor = "white")
+wordcloud(words = word_count$word, freq = word_count$n, min.freq = 1,
+          max.words = 150, random.order = FALSE, rot.per = 0.35, 
+          colors = brewer.pal(8, "Dark2"))
 bag_of_words %>% 
   pairwise_count(word, id) %>% 
   filter(n >= 400) %>%
@@ -107,7 +109,7 @@ bag_of_words_married_has_child <-
 word_count_married_has_child <- bag_of_words_married_has_child %>% count(word, sort = TRUE)
 ```
 
-##Topic analysis
+##Category analysis
 There are some very common problems, for example, will people change before and after marriage? What is the difference between a man and a woman in their marriage?
 
 ```{r echo=FALSE, results='hide',message=FALSE}
@@ -124,7 +126,6 @@ pie1 <- bp1 + coord_polar("y", start = 0) +
             guides(fill = guide_legend(title = "Group")) +
             ggtitle("Single")
 pie1
-single_pred_category
 
 married_pred_category <- data.frame(table(as.factor(married$predicted_category)))
 married_pred_category %>%
@@ -135,9 +136,14 @@ bp2 <- ggplot(married_pred_category,
             geom_bar(width = 1, stat = "identity") + 
             guides(fill = guide_legend(title = "Group"))
 pie2 <- bp2 + coord_polar("y", start= 0) + ggtitle("Married")
-pie2
+
+```
+
+```{r}
+single_pred_category
 married_pred_category
 ```
+
 
 (The first table is for single and the second is for married people.)
 I used the demographic information in the database to extract the happy moment for single and married people. In the pie chart, it is obvious that the proportion of "affection", that is, love, has increased significantly. In contrast, "achievement" has been significantly reduced. At the same time, people have less happy moments of leisrue, and the happy moment of exercise is relatively less. This results are consistent with our common sense. Compared with singles, people don't have so much personal disposable time after getting married. They have to spend more time facing their family.
@@ -154,7 +160,6 @@ bp3 <- ggplot(married_male_pred_category,
             guides(fill = guide_legend(title = "Group"))
 pie3 <- bp3 + coord_polar("y", start = 0) + ggtitle("Married Male")
 pie3
-married_male_pred_category
 
 married_female_pred_category <- data.frame(table(as.factor(married_female$predicted_category)))
 married_female_pred_category %>%
@@ -166,8 +171,13 @@ bp4 <- ggplot(married_female_pred_category,
             guides(fill = guide_legend(title = "Group"))
 pie4 <- bp4 + coord_polar("y", start = 0) + ggtitle("Married Female")
 pie4
+```
+
+```{r}
+married_male_pred_category
 married_female_pred_category
 ```
+
 
 (The first table is for married male and the second is for married female.)
 In this comparison of married men and women, we can see that men have more "achievement" happy moments than women. Women's "affection" happy moment is more than men. This is also in line with our ideas. Men are more engaged with careers or other things that make them feel more "achievement" than women. On the other hand, women are more emotional.
@@ -212,6 +222,8 @@ bag_of_words_single_with_match_index_exerc <-
   bag_of_words_single_with_match_index_exerc[!duplicated(bag_of_words_single_with_match_index_exerc$hmid), ]
 ```
 
+##Entertainment comparison
+
 ```{r echo=FALSE, results='hide',message=FALSE}
 ##Entertainment comparison for married and single people.
 ##Married
@@ -243,6 +255,8 @@ single_entertainment_count[1:5, ]
 
 Will the entertainment activities of people change before and after marriage? I took people's first five entertainment, activities according to the frequency of the two groups of activities, before and after marriage and compared them. It should be noted that the “video” here actually represents video games. We can very clearly find that after marriage, the happy moments of people playing video games are significantly reduced. (My girlfriend doesn't allow me to play games. Sad.) In contrast, the happy moment of watching movies has increased a lot. This phenomenon is very reasonable. The joy of plaaying computer or console game is belong to a single person. Because other than the participants, people watching are not so easy to get joy. However, the fun of watching movies with the family can be shared with family members.
 
+##Exercises comparison
+
 ```{r echo=FALSE, results='hide',message=FALSE}
 ##Exercises comparison for married and single people.
 ##Married
@@ -270,60 +284,12 @@ bp8 <- ggplot(single_exerc_count[1:5, ],
 grid.arrange(bp7, bp8, nrow = 1)
 ```
 
+![](/Users/zongbocai/Documents/GitHub/Spring2019-Proj1-NapaCabbage/figs/marriage_workout.jpg)
+
 Will people's exercise habits change after marriage? Interestingly, it will. I also selected the first five sports activities based on frequency. From the results, the happy moment after marriage has basketball and softball, which are not shown in single activites. A possible explanation is that these can be family activities. Same reason as the joy of watching a movie, the happiness of the collective activities can be shared.
 
-```{r echo=FALSE, results='hide',message=FALSE}
-##Sentiment analysis for single vs married when doing certain entertainment activities.
-##(Movie, Video, Music, Book)
-##Extract (Movie, Video, Music, Book) from bag_of_words.
-topic_ent <- c("movie", "video", "music", "book")
-sm_bow_married <- na.omit(cbind(bag_of_words_married_with_match_index,
-              match(bag_of_words_married_with_match_index$word, topic_ent)))
-##Topic index is the index in the vector topic_ent
-colnames(sm_bow_married)[ncol(sm_bow_married)] <- "topic_index"
-
-sm_bow_single <- na.omit(cbind(bag_of_words_single_with_match_index,
-              match(bag_of_words_single_with_match_index$word, topic_ent)))
-colnames(sm_bow_single)[ncol(sm_bow_single)] <- "topic_index"
-
-##Retain the original married df with entertainment texts.
-hmid_married_ent <- sm_bow_married$hmid
-sm_analysis_married <- cbind(na.omit(
-  cbind(married, match(married$hmid, hmid_married_ent))), sm_bow_married$topic_index)
-
-##Retain the original single df with entertainment texts.
-hmid_single_ent <- sm_bow_single$hmid
-sm_analysis_single <- cbind(na.omit(
-  cbind(single, match(single$hmid, hmid_single_ent))), sm_bow_single$topic_index)
-
-##Emotion analysis
-##Married
-emotions_married_ent = get_nrc_sentiment(sm_analysis_married$text)
-word.count_married_ent = word_count(sm_analysis_married$text)
-# colnames(emotions)=paste0("emo.", colnames(emotions))
-# in case the word counts are zeros?
-emotions_weighted_married_ent = diag(1 / (word.count_married_ent + 0.01)) %*% as.matrix(emotions_married_ent)
-
-##Single
-emotions_single_ent = get_nrc_sentiment(sm_analysis_single$text)
-word.count_single_ent = word_count(sm_analysis_single$text)
-# colnames(emotions)=paste0("emo.", colnames(emotions))
-# in case the word counts are zeros?
-emotions_weighted_single_ent = diag(1 / (word.count_single_ent + 0.01)) %*% as.matrix(emotions_single_ent)
-
-##Remove "negative" colnum.
-emotions_weighted_married_ent <- emotions_weighted_married_ent[, -9]
-emotions_weighted_single_ent <- emotions_weighted_single_ent[, -9]
-
-sm_analysis_married <- cbind(sm_analysis_married, emotions_weighted_married_ent)
-sm_analysis_single <- cbind(sm_analysis_single, emotions_weighted_single_ent)
-
-married_emotions <- sm_analysis_married[,c(1, 19:27)] %>% gather("emotion", "prop", -hmid)
-single_emotions <- sm_analysis_single[,c(1, 19:27)] %>% gather("emotion", "prop", -hmid)
-
-married_emotions <- married_emotions %>% inner_join(sm_analysis_married, by = "hmid")
-single_emotions <- single_emotions %>% inner_join(sm_analysis_single, by = "hmid")
-```
+##Conclusion
+After the marriage, people's happy moments will indeed change. Compared with singles, people will do more family activities to share joy, such as watching movies, playing basketball, and so on. When you are single, more happiness comes from "achievement." And when you get married, more happiness comes from joy from the other half or the the family.
 
 
 
