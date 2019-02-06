@@ -94,6 +94,7 @@ hm_bigrams <- hm_data %>%
 bigram_counts <- hm_bigrams %>%
   separate(bigram, c("word1", "word2"), sep = " ") %>%
   count(word1, word2, sort = TRUE)
+bigram_counts
 ```
 
 ### Specify the user interface for the R Shiny app
