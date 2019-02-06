@@ -67,7 +67,7 @@ p <- ggplot(data = word_count[1:10, ], aes(x = reorder(word, -n), y = n)) +
 p
 ```
 
-Let's first take a look at what this database looks like. After I split the entire corpus, I draw a bar plot. It can be seen from the figure that the words friends, day, time, family, watched, and home have the highest frequency. As you can see from netgraph, how often these words are connected to other words. For example, time and family have strong connections, so as video and game.
+Let's first take a look at what this database looks like. After I split the entire corpus, I draw a bar plot. It can be seen from the figure that the words friends, day, time, family, watched, and home have the highest frequency. The wordcloud above is another interesting illustration of frequency of the words. As you can see from netgraph, how often these words are connected to other words. For example, time and family have strong connections, so as video and game.
 
 ```{r echo=FALSE, results='hide',message=FALSE}
 ##Hnadle data.
@@ -146,6 +146,7 @@ married_pred_category
 
 
 (The first table is for single and the second is for married people.)
+
 I used the demographic information in the database to extract the happy moment for single and married people. In the pie chart, it is obvious that the proportion of "affection", that is, love, has increased significantly. In contrast, "achievement" has been significantly reduced. At the same time, people have less happy moments of leisrue, and the happy moment of exercise is relatively less. This results are consistent with our common sense. Compared with singles, people don't have so much personal disposable time after getting married. They have to spend more time facing their family.
 
 ```{r echo=FALSE, results='hide',message=FALSE}
@@ -180,6 +181,7 @@ married_female_pred_category
 
 
 (The first table is for married male and the second is for married female.)
+
 In this comparison of married men and women, we can see that men have more "achievement" happy moments than women. Women's "affection" happy moment is more than men. This is also in line with our ideas. Men are more engaged with careers or other things that make them feel more "achievement" than women. On the other hand, women are more emotional.
 
 ```{r echo=FALSE, results='hide',message=FALSE}
